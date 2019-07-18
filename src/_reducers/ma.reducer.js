@@ -2,6 +2,8 @@ import { medAvConstants } from '../_constants';
 
 export function ma(state = {}, action) {
   switch (action.type) {
+  
+
     case medAvConstants.GETALL_REQUEST:
       return {
         loading: true

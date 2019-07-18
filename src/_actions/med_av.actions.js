@@ -4,10 +4,22 @@ import { alertActions } from '.';
 
 export const medAvActions = {
     create,
+    update,
     getAll,
     delete: _delete
 };
-
+const formattedDate = (d) =>{
+    console.log(d)
+    d =  new Date(d)
+   let month = String(d.getMonth() + 1);
+   let day = String(d.getDate() + 1);
+   const year = String(d.getFullYear());
+ 
+   if (month.length < 2) month = '0' + month;
+   if (day.length < 2) day = '0' + day;
+ 
+   return `${year}-${month}-${day}`;
+ }
 function create(ma) {
     return dispatch => {
         dispatch(request(ma));
@@ -25,9 +37,32 @@ function create(ma) {
             );
     };
 
-    function request(ma) { return { type: medAvConstants.REGISTER_REQUEST, ma } }
-    function success(ma) { return { type: medAvConstants.REGISTER_SUCCESS, ma } }
-    function failure(error) { return { type: medAvConstants.REGISTER_FAILURE, error } }
+    function request(ma) { return { type: medAvConstants.CREATE_REQUEST, ma } }
+    function success(ma) { return { type: medAvConstants.CREATE_SUCCESS, ma } }
+    function failure(error) { return { type: medAvConstants.CREATE_FAILURE, error } }
+}
+function update(ma) {
+    ma.start = formattedDate(ma.start)
+    ma.end = formattedDate(ma.end)
+    return dispatch => {
+        dispatch(request(ma));
+
+        medAvService.update(ma)
+            .then(
+                ma => { 
+                    dispatch(success());
+                    dispatch(alertActions.success('disponibility updated'));
+                },
+                error => {
+                    dispatch(failure(error.toString()));
+                    dispatch(alertActions.error(error.toString()));
+                }
+            );
+    };
+
+    function request(ma) { return { type: medAvConstants.UPDATE_REQUEST, ma } }
+    function success(ma) { return { type: medAvConstants.UPDATE_SUCCESS, ma } }
+    function failure(error) { return { type: medAvConstants.UPDATE_FAILURE, error } }
 }
 
 function getAll() {
