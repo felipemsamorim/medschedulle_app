@@ -8,25 +8,17 @@ export const medAvActions = {
     getAll,
     delete: _delete
 };
-const formattedDate = (d) =>{
-    console.log(d)
-    d =  new Date(d)
-   let month = String(d.getMonth() + 1);
-   let day = String(d.getDate() + 1);
-   const year = String(d.getFullYear());
- 
-   if (month.length < 2) month = '0' + month;
-   if (day.length < 2) day = '0' + day;
- 
-   return `${year}-${month}-${day}`;
- }
+const formattedDate = (d) => {
+    d = d.split('/')
+    return `${d[2]}-${d[1]}-${d[0]}`;
+}
 function create(ma) {
     return dispatch => {
         dispatch(request(ma));
 
         medAvService.create(ma)
             .then(
-                ma => { 
+                ma => {
                     dispatch(success());
                     dispatch(alertActions.success('disponibility created'));
                 },
@@ -49,9 +41,10 @@ function update(ma) {
 
         medAvService.update(ma)
             .then(
-                ma => { 
-                    dispatch(success());
+                ma => {
+                    dispatch(success(ma));
                     dispatch(alertActions.success('disponibility updated'));
+                    dispatch(getAll())
                 },
                 error => {
                     dispatch(failure(error.toString()));

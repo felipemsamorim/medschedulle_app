@@ -3,6 +3,14 @@ import { medAvConstants } from '../_constants';
 export function ma(state = {}, action) {
   switch (action.type) {
   
+    case medAvConstants.UPDATE_REQUEST:
+      return { updating: true };
+    case medAvConstants.UPDATE_SUCCESS:
+      return action.ma;
+    case medAvConstants.UPDATE_FAILURE:
+      return { 
+        error: action.error
+      };
 
     case medAvConstants.GETALL_REQUEST:
       return {

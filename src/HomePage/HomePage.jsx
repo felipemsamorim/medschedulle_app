@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { DataGrid, GridColumn, Form, Dialog, TextBox, Calendar, Label, LinkButton, ButtonGroup } from 'rc-easyui';
-import { medAvActions } from '../_actions';
+import { medAvActions, medsActions } from '../_actions';
 
 class HomePage extends React.Component {
     constructor(props) {
@@ -23,6 +23,7 @@ class HomePage extends React.Component {
 
     componentDidMount() {
         this.props.dispatch(medAvActions.getAll());
+        this.props.dispatch(medsActions.getOneSession());
         this.setState({ data: this.props.ma })
     }
     componentDidUpdate() {
@@ -44,12 +45,21 @@ class HomePage extends React.Component {
             closed: false
         });
     }
+    newRow() {
+        let row = {id: 0, start:new Date(), end: new Date(), med: 2}
+        this.setState({
+            editingRow: {},
+            model: {},
+            title: 'New Availability',
+            closed: false
+        });
+    }
     saveRow() {
         this.form.validate(() => {
             if (this.form.valid()) {
-            this.props.dispatch(medAvActions.update(this.state.editingRow))
-               this.props.dispatch(medAvActions.getAll())
-               this.setState({ closed: true })
+                this.props.dispatch(medAvActions.update(this.state.model))
+                this.props.dispatch(medAvActions.getAll())
+                this.setState({ closed: true })
             }
         })
     }
@@ -58,27 +68,25 @@ class HomePage extends React.Component {
             data: this.state.data.filter(r => r !== row)
         })
     }
-    formatDate(date) {
+    formatDate(date,add = false) {
         let y = date.getFullYear();
         let m = date.getMonth() + 1;
-        let d = date.getDate();
+        let d = date.getDate() + (!add ? 1 : 0);
         return [d, m, y].join('/')
     }
     handleStartSelectionChange(selection) {
-        let start = {start: this.formatDate(selection)}
-        let end = {end: this.state.model.end}
+        let model = JSON.parse(JSON.stringify(this.state.model))
+        model.start = this.formatDate(selection,true)
         this.setState({
-            model: { ...start, ...end}
+            model: model
         })
-        console.log(this.state.model)
     }
     handleEndSelectionChange(selection) {
-        let start = {start: this.state.model.start}
-        let end = {end: this.formatDate(selection)}
+        let model = JSON.parse(JSON.stringify(this.state.model))
+        model.end = this.formatDate(selection,true)
         this.setState({
-            model: { ...start, ...end}
+            model: model
         })
-        console.log(this.state.model)
     }
 
     renderDialog() {
@@ -105,7 +113,7 @@ class HomePage extends React.Component {
                         </div>
                         <div style={{ marginBottom: 10 }}>
                             <Label htmlFor="end">Name:</Label>
-                            
+
                             <Calendar
                                 style={{ width: 250, height: 250 }}
                                 onSelectionChange={this.handleEndSelectionChange.bind(this)}
@@ -130,12 +138,13 @@ class HomePage extends React.Component {
             <div className="col-md-6 col-md-offset-3">
                 <h3>Dashboard - availabilities</h3>
                 <div>
+                <LinkButton iconCls="icon-add" onClick={() => this.newRow()}>Add</LinkButton>
                     <DataGrid data={ma.items} style={{ height: 250 }}>
                         <GridColumn field="start" align="center" render={({ row }) => {
                             var d = new Date(row.start);
                             var y = d.getFullYear();
                             var m = d.getMonth() + 1;
-                            var d = d.getDate() +1;
+                            var d = d.getDate() + 1;
                             return d + '/' + m + '/' + y;
                         }}
                             title="dt_start">
@@ -161,9 +170,9 @@ class HomePage extends React.Component {
                     {this.renderDialog()}
                 </div>
 
-                <p>
+                <button>
                     <Link to="/login">Logout</Link>
-                </p>
+                </button>
             </div>
         );
     }
